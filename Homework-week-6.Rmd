@@ -72,7 +72,7 @@ Z.prop.test <- function(p1,n1,p0,p2=NULL,n2=NULL,alternative="two.sided",conf.le
     singleSample<-TRUE
     zStat <- (p1-p0)/sqrt((p0*(1-p0))/n1)
     #Check the alternative hypothesis
-    #Two sided test
+    #Two tailed test
     if(alternative=="two.sided"){
     pVal <- 2*(1-pnorm(zStat))
     }
@@ -131,15 +131,16 @@ summary(fittedData)
 
 ```
 ####Interpretations:
-####Point esimates of Coefficient ($\beta_1\$): For every one-unit increase in the brain size, MaxLongevity would increase by 1.218 months
-####Outcome of Hypotheses H0: beta1 = 0 , HA beta1  ≠ 0 : Since p < 2e-16, it means that it is evident from the tests that the brain size does impact the longevity
+-Point esimates of Coefficient ($\beta_1\$): For every one-unit increase in the brain size, MaxLongevity would increase by 1.218 months
+-Outcome of Hypotheses H0: beta1 = 0 , HA beta1  ≠ 0 : Since p < 2e-16, it means that it is evident from the tests that the brain size does impact the longevity
 ```{r}
 #Point estimates of the regression coefficient beta1 : Logarithmic values
 logfittedData <- lm(log(MaxLongevity_m)~log(Brain_Size_Species_Mean),data=my_data)
-summary(fittedData)
+summary(logfittedData)
 ```
-####LOGS:Interpretation from the point esimates of Coefficient ($\beta_1\$): For every one-unit increase in the log of brain size, log of MaxLongevity would increase by .23415 units
-####LOGS:Outcome of Hypotheses H0: beta1 = 0 , HA beta1  ≠ 0 : Since p < 2e-16, it means that it is evident from the tests that the brain size does impact the longevity
+####LOGS:Interpretation:
+- From the point esimates of Coefficient ($\beta_1\$): For every one-unit increase in the log of brain size, log of MaxLongevity would increase by .23415 units
+- Outcome of Hypotheses H0: beta1 = 0 , HA beta1  ≠ 0 : Since p < 2e-16, it means that it is evident from the tests that the brain size does impact the longevity
 
 Also, find a 90 percent CI for the slope ($\beta_1$) parameter.
 ```{r}
@@ -162,7 +163,7 @@ names(subframe)<-c("Brain_Size_Species_Mean","MaxLongevity_m","cifit","cilwr","c
 pi <- predict(subfittedData, newdata = data.frame(Brain_Size_Species_Mean = subframe$Brain_Size_Species_Mean), interval = "prediction", level = 0.90)
 subframe <- cbind(subframe,pi)
 head(subframe)
-ggplot(data = subframe, aes(x = Brain_Size_Species_Mean , y = MaxLongevity_m) ) + geom_point() + geom_line(aes(x = Brain_Size_Species_Mean, y = cifit, colour = cifit)) + geom_line(aes(x = Brain_Size_Species_Mean, y = cilwr, colour = cilwr)) + geom_line(aes(x = Brain_Size_Species_Mean, y = ciupr,colour = ciupr)) + geom_line(aes(x = Brain_Size_Species_Mean, y = lwr,colour = lwr)) + geom_line(aes(x = Brain_Size_Species_Mean, y = upr,colour = upr)) + guides(colour = "legend")
+ggplot(data = subframe, aes(x = Brain_Size_Species_Mean , y = MaxLongevity_m) ) + geom_point() + geom_smooth(method="lm",aes(x = Brain_Size_Species_Mean, y = cifit, colour = "fit")) + geom_line(aes(x = Brain_Size_Species_Mean, y = cilwr, colour = "ci")) + geom_line(aes(x = Brain_Size_Species_Mean, y = ciupr,colour = "ci")) + geom_line(aes(x = Brain_Size_Species_Mean, y = lwr,colour = "pi")) + geom_line(aes(x = Brain_Size_Species_Mean, y = upr,colour = "pi"))  + scale_color_manual(name="Colour Legend",values = c("fit"="black", "ci"="red","pi"="blue"))
 
 #For logarithmic values
 logsubframe<-data.frame(cbind(log(my_data$Brain_Size_Species_Mean),log(my_data$MaxLongevity_m)))
@@ -179,7 +180,7 @@ pi <- predict(logsubfittedData, newdata = data.frame(logBrain_Size_Species_Mean 
 logsubframe <- cbind(logsubframe,pi)
 
 head(logsubframe)
-ggplot(data = logsubframe, aes(x = logBrain_Size_Species_Mean , y = logMaxLongevity_m) ) + geom_point() + geom_line(aes(x = logBrain_Size_Species_Mean, y = cifit), colour = "black",show.legend = TRUE) + geom_line(aes(x = logBrain_Size_Species_Mean, y = cilwr), colour = "blue",show.legend = TRUE) + geom_line(aes(x = logBrain_Size_Species_Mean, y = ciupr),colour = "blue",show.legend = TRUE) + geom_line(aes(x = logBrain_Size_Species_Mean, y = lwr),colour = "red",show.legend = TRUE) + geom_line(aes(x = logBrain_Size_Species_Mean, y = upr),colour = "red",show.legend = TRUE) + scale_colour_manual("Lines", labels=c("fitted", "conf interval","prediction interval"), values=c("black","red", "blue"))
+ggplot(data = logsubframe, aes(x = logBrain_Size_Species_Mean , y = logMaxLongevity_m) ) + geom_point() + geom_smooth(method = "lm",aes(x = logBrain_Size_Species_Mean, y = cifit, colour = "fit"))  + geom_line(aes(x = logBrain_Size_Species_Mean, y = cilwr, colour = "ci")) + geom_line(aes(x = logBrain_Size_Species_Mean, y = ciupr, colour = "ci")) + geom_line(aes(x = logBrain_Size_Species_Mean, y = lwr,colour = "pi")) + geom_line(aes(x = logBrain_Size_Species_Mean, y = upr ,colour = "pi"))  + scale_color_manual(name="Colour Legend",values = c("fit"="black", "ci"="red","pi"="blue"))
 ```
 
 - Produce a point estimate and associated 90 percent PI for the longevity of a species whose brain weight is 800 gm. Do you trust the model to predict observations accurately for this value of the explanatory variable? Why or why not?
@@ -199,4 +200,19 @@ loglongevityPointEst
 loglongevityPi <- predict(logsubfittedData,newdata=data.frame(logBrain_Size_Species_Mean=log(800)),interval="prediction",level=0.90)
 loglongevityPi
 ```
+###Interpretation:
+
+
+Comparing the predictor values for the original data and the predictor value of 800gms, it feels like a mean of 800 gram is an outlier for the original data we are using here. THe regression model is built for mean predictor value far from 800grams which makes me hesitant to follow this model for a predictor value of 800 gms. 
+On the other hand, the regression model for the log data has a wider spread and the log transformed predictor variable is well within the range of the initial log transforms of the raw data. Due to this reason I am more likely to trust the regression model built for logarithmic values
+
+
 - Looking at your two models, which do you think is better? Why?
+
+
+###Comparison
+
+
+Comparing the two models I am more likely to trust the model built for logarithmic values because:
+1. The values are more spread out and the model build on logs is more likely to give me correct predictions for higher brain sizes as reasoned in the previous question
+2. Even though it is not the only parameter that goes into identifying a good model, but the value of R^squared is more for the model built on logarithmic values which is an indicator that more variance is accounted for in the prediction of longevity. 
